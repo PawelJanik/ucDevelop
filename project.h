@@ -27,6 +27,17 @@ public:
 	QList <MCU> getMcuList();
 	QList <Programmer> getProgrammerList();
 
+	QString buildCommand;
+	QString buildCommandAttribute;
+	QString uploadCommand;
+	QString uploadCommandAttribute;
+	QString cleanCommand;
+
+	QString projectType;
+	QString projectManager;
+
+	QString autorName;
+
 	QString showProjectData();
 
 private:

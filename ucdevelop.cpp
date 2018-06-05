@@ -132,7 +132,7 @@ void ucDevelop::openURL(QString fileName)
 		doc.last()->openUrl(url);
 
 		ui->fileWidget->addItem(url.fileName());
-		ui->fileWidget->setCurrentRow(doc.count());
+		ui->fileWidget->setCurrentRow((ui->fileWidget->count())-1);
 
 		connect(doc.last(), SIGNAL(modifiedChanged(KTextEditor::Document *)), this, SLOT(documentChanged()));
 		connect(doc.last(), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
@@ -161,7 +161,7 @@ void ucDevelop::openProjectUrl(QUrl projectUrl)
 	{
 		ui->statusBar->showMessage(QString("Open project from URL: ").append(projectUrl.path()));
 		project.setProjectData(projectUrl);
-		//ui->output->setText(project.showProjectData());
+		//ui->output->setText(project.showProjectData());	//show data about opening project
 
 		projectFileModel = new QFileSystemModel;
 		ui->projectView->setModel(projectFileModel);
@@ -172,6 +172,12 @@ void ucDevelop::openProjectUrl(QUrl projectUrl)
 		ui->projectView->hideColumn(3);
 
 		openURL(QString(project.path.path()).append("/").append(project.fileList.at(0)));
+
+		ui->actionBuild->setEnabled(true);
+		ui->actionUpload->setEnabled(true);
+		ui->actionBuildAndUpload->setEnabled(true);
+		ui->actionCleanProject->setEnabled(true);
+		ui->actionRebuild->setEnabled(true);
 	}
 }
 
@@ -315,6 +321,16 @@ void ucDevelop::build()
 	connect(buildProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(readProcessData()));
 
 	QStringList arg;
+	if(!project.buildCommand.isEmpty())
+		arg << project.buildCommand;
+
+	if(!project.buildCommandAttribute.isEmpty())
+		arg << project.buildCommandAttribute;
+
+	//if(project.projectManager == "cmake")			//for cmake
+	//	buildProcess->start("cmake", arg);
+
+	//buildProcess->waitForFinished();
 
 	buildProcess->start("make", arg);
 
@@ -378,7 +394,14 @@ void ucDevelop::upload()
 		connect(buildProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(readProcessData()));
 
 		QStringList arg;
-		arg << "flash";
+		if(!project.uploadCommand.isEmpty())
+			arg << project.uploadCommand;
+
+		if(!project.uploadCommandAttribute.isEmpty())
+		{
+			arg << " ";
+			arg << project.uploadCommandAttribute;
+		}
 
 		buildProcess->start("make", arg);
 
@@ -428,7 +451,7 @@ void ucDevelop::cleanProject()
 	connect(buildProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(readProcessData()));
 
 	QStringList arg;
-	arg << "clean";
+	arg << project.cleanCommand;
 
 	buildProcess->start("make", arg);
 

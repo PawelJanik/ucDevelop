@@ -1,3 +1,4 @@
+#include "global.h"
 #include "newprojectdialog.h"
 #include "ui_newprojectdialog.h"
 
@@ -53,10 +54,49 @@ void newProjectDialog::selectTemplate()
 	{
 		QString stringLine = templateFileStream.readLine();
 
+		//ignorate comment line in template file
+		//if(stringLine.at(0) == "#")
+		//	continue;
+
 		if(stringLine.contains("templateDescription=",Qt::CaseInsensitive))
 		{
 			stringLine.remove("templateDescription=",Qt::CaseInsensitive);
 			ui->descriptionTextEdit->setText(stringLine);
+		}
+		else if(stringLine.contains("projectType",Qt::CaseInsensitive))
+		{
+			stringLine.remove("projectType=",Qt::CaseInsensitive);
+			project.projectType = stringLine;
+		}
+		else if(stringLine.contains("projectManager",Qt::CaseInsensitive))
+		{
+			stringLine.remove("projectManager=",Qt::CaseInsensitive);
+			project.projectManager = stringLine;
+		}
+		else if(stringLine.contains("buildCommand",Qt::CaseInsensitive))
+		{
+			stringLine.remove("buildCommand=",Qt::CaseInsensitive);
+			project.buildCommand = stringLine;
+		}
+		else if(stringLine.contains("buildCommandAttribute",Qt::CaseInsensitive))
+		{
+			stringLine.remove("buildCommandAttribute=",Qt::CaseInsensitive);
+			project.buildCommandAttribute = stringLine;
+		}
+		else if(stringLine.contains("uploadCommand",Qt::CaseInsensitive))
+		{
+			stringLine.remove("uploadCommand=",Qt::CaseInsensitive);
+			project.uploadCommandAttribute = stringLine;
+		}
+		else if(stringLine.contains("uploadCommandAttribute",Qt::CaseInsensitive))
+		{
+			stringLine.remove("uploadCommandAttribute=",Qt::CaseInsensitive);
+			project.uploadCommandAttribute = stringLine;
+		}
+		else if(stringLine.contains("cleanCommand",Qt::CaseInsensitive))
+		{
+			stringLine.remove("cleanCommand=",Qt::CaseInsensitive);
+			project.cleanCommand = stringLine;
 		}
 		else if(stringLine.contains("fileList",Qt::CaseInsensitive))
 		{
@@ -120,10 +160,28 @@ void newProjectDialog::createProject()
 	else
 		project.name = ui->projectNameEdit->text();
 
+	if(ui->autorNameEdit->text().isEmpty())
+	{
+		msgBox.setText("Enter your name.");
+		msgBox.exec();
+		err = true;
+	}
+	else
+		project.autorName = ui->autorNameEdit->text();
+
 	project.mcu = mcuList.at(ui->mcuComboBox->currentIndex());
 	project.programmer = programmerList.at(ui->programmerComboBox->currentIndex());
-	project.mcu.clock = ui->clockEdit->text();
 	project.programmer.portName = ui->portEdit->text();
+
+	if(ui->clockEdit->text().isEmpty())
+	{
+		msgBox.setText("Enter frequency for clock.");
+		msgBox.exec();
+		err = true;
+	}
+	else
+		project.mcu.clock = ui->clockEdit->text();
+
 	if(ui->pathToProjectRequister->url().isEmpty())
 	{
 		msgBox.setText("Select project file");
@@ -183,6 +241,7 @@ void newProjectDialog::createProject()
 			if(!project.programmer.portName.isEmpty())
 				fileString.replace("#PORT_PROGRAMMER = -P", QString("PORT_PROGRAMMER = -P ").append(project.programmer.portName),Qt::CaseInsensitive);
 			fileString.replace("[clock]", project.mcu.clock,Qt::CaseInsensitive);
+			fileString.replace("[autorName]", project.autorName,Qt::CaseInsensitive);
 
 			if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
 				return;

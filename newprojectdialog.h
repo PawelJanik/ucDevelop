@@ -7,13 +7,9 @@
 #include <QTextStream>
 #include <QMessageBox>
 
-#include "global.h"
-
 #include "project.h"
 #include "mcu.h"
 #include "programmer.h"
-
-//#define ucdevelopVersion "1.0.0"
 
 namespace Ui {
 class newProjectDialog;

@@ -25,6 +25,7 @@ void Project::setProjectData(QUrl projectUrl)
 	while (!projectFileStream.atEnd())
 	{
 		QString projectFileString = projectFileStream.readLine();
+
 		if(projectFileString.contains("projectName=",Qt::CaseInsensitive))
 		{
 			name = projectFileString.remove("projectName=");
@@ -33,9 +34,37 @@ void Project::setProjectData(QUrl projectUrl)
 		{
 			mcu.id = projectFileString.remove("mcu=");
 		}
+		else if(projectFileString.contains("clock=",Qt::CaseInsensitive))
+		{
+			mcu.clock = projectFileString.remove("clock=");
+		}
 		else if(projectFileString.contains("programmer=",Qt::CaseInsensitive))
 		{
 			programmer.id = projectFileString.remove("programmer=");
+		}
+		else if(projectFileString.contains("projectType=",Qt::CaseInsensitive))
+		{
+			projectType = projectFileString.remove("projectType=");
+		}
+		else if(projectFileString.contains("projectManager=",Qt::CaseInsensitive))
+		{
+			projectManager = projectFileString.remove("projectManager=");
+		}
+		else if(projectFileString.contains("buildCommand=",Qt::CaseInsensitive))
+		{
+			buildCommand = projectFileString.remove("buildCommand=");
+		}
+		else if(projectFileString.contains("uploadCommand=",Qt::CaseInsensitive))
+		{
+			uploadCommand = projectFileString.remove("uploadCommand=");
+		}
+		else if(projectFileString.contains("cleanCommand=",Qt::CaseInsensitive))
+		{
+			cleanCommand = projectFileString.remove("cleanCommand=");
+		}
+		else if(projectFileString.contains("autorName=",Qt::CaseInsensitive))
+		{
+			autorName = projectFileString.remove("autorName=");
 		}
 		else if(projectFileString.contains("fileList",Qt::CaseInsensitive))
 		{
@@ -62,11 +91,19 @@ QString Project::showProjectData()
 	str.append("MCU descriptio: ").append(mcu.description).append("\n");
 	str.append("MCU id: ").append(mcu.id).append("\n");
 	str.append("MCU signature: ").append(mcu.signature).append("\n");
+	str.append("MCU clock: ").append(mcu.clock).append("\n");
 	str.append("Programmer description: ").append(programmer.description).append("\n");
 	str.append("Programmer id: ").append(programmer.id).append("\n");
 	str.append("File list:\n");
 	for(int i = 0; i < fileList.count(); i++)
 		str.append("\t-").append(fileList.at(i)).append("\n");
+
+	str.append("Build command:").append(buildCommand).append("\n");
+	str.append("Build command attribute:").append(buildCommandAttribute).append("\n");
+	str.append("Upload command:").append(uploadCommand).append("\n");
+	str.append("Upload command attribute:").append(uploadCommandAttribute).append("\n");
+	str.append("Clean command:").append(cleanCommand).append("\n");
+	str.append("Autor name:").append(autorName).append("\n");
 
 	return str;
 }

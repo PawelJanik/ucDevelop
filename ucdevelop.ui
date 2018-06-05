@@ -80,7 +80,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>&amp;Help</string>
+     <string>He&amp;lp</string>
     </property>
     <addaction name="actionHelp"/>
     <addaction name="actionAbout"/>
@@ -205,6 +205,9 @@
    <addaction name="actionCut"/>
   </widget>
   <widget class="QToolBar" name="projectToolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>toolBar_2</string>
    </property>
@@ -279,16 +282,25 @@
    </property>
   </action>
   <action name="actionBuild">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Build</string>
    </property>
   </action>
   <action name="actionUpload">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Upload</string>
    </property>
   </action>
   <action name="actionBuildAndUpload">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Build &amp;and Upload</string>
    </property>
@@ -338,11 +350,17 @@
    </property>
   </action>
   <action name="actionCleanProject">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Clean project</string>
    </property>
   </action>
   <action name="actionRebuild">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Rebu&amp;ild</string>
    </property>
