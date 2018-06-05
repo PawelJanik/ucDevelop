@@ -38,7 +38,8 @@ HEADERS += \
     projectsettingsdialog.h \
     newprojectdialog.h \
     mcu.h \
-    programmer.h
+    programmer.h \
+    global.h
 
 FORMS += \
         ucdevelop.ui \
