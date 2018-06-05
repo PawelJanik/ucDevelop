@@ -1,0 +1,14 @@
+avrguiVersion=[avrguiVersion]
+templateName=AVR C
+templateDescription=Base c template for AVR microcontroller.
+projectName=[projectName]
+mcu=[mcu]
+clock=[clock]
+programmer=[programmer]
+programmerPort=[programmerPort]
+fileList
+	main.c
+	function.c
+	function.h
+	makefile
+;
