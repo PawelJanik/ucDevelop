@@ -13,6 +13,7 @@
 #include <QModelIndex>
 
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include <QProcess>
 #include <QScrollBar>
@@ -66,6 +67,13 @@ public slots:
 	void settings();
 	void projectSettings();
 
+	void addFile();
+	void addClass();
+	void importFile();
+	void importFolder();
+
+	void closeProject();
+
 	void viewIsChanged();
 
 	void help();
@@ -74,6 +82,7 @@ public slots:
 	void fileListClicked();
 	void documentChanged();
 	void documentSaved();
+	void documentSavedAt(int index);
 
 	void projectViewDoubleClick(QModelIndex index);
 
@@ -83,7 +92,7 @@ private:
 	Ui::ucDevelop *ui;
 
 	KTextEditor::Editor *editor;
-	KTextEditor::View *view;
+	KTextEditor::View * view;
 
 	QList<KTextEditor::Document *> doc;
 

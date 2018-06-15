@@ -4,7 +4,7 @@ MCU = [mmcu]
 CLK = 16000000
 PRGRAMMER = [programmer]
 #PORT_PROGRAMMER = -P
-SRC = main.c function.c
+SRC = main.c class.cpp
 EXT =
 
 
@@ -22,7 +22,7 @@ AVRDUDE = avrdude -c $(PRGRAMMER) $(PORT_PROGRAMMER) -p $(MCU)
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
 SIZE    = avr-size --format=avr --mcu=$(MCU)
-CC      = avr-gcc
+CC      = avr-g++
 
 # generate list of objects
 CFILES    = $(filter %.c, $(SRC))

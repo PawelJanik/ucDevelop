@@ -1,4 +1,4 @@
-//Project create in AvrGui [avrguiVersion]
+//Project create in ucDevelop [ucdevelopVersion] by [autorName]
 
 #include <avr/io.h>
 

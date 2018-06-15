@@ -1,8 +1,8 @@
 //Project create in ucDevelop [ucdevelopVersion] by [autorName]
 
-#include "function.h"
+#include "class.h"
 
-void func()
+void myClass::func()
 {
 	//example fnction
-}
+};
