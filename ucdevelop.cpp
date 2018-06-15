@@ -39,6 +39,13 @@ ucDevelop::ucDevelop(QWidget *parent) :
 	connect(ui->actionSettings, SIGNAL(triggered()), this, SLOT(settings()));
 	connect(ui->actionProjectSettings, SIGNAL(triggered()), this, SLOT(projectSettings()));
 
+	connect(ui->actionAddFile, SIGNAL(triggered()), this, SLOT(addFile()));
+	connect(ui->actionAddClass, SIGNAL(triggered()), this, SLOT(addClass()));
+	connect(ui->actionImportFile, SIGNAL(triggered()), this, SLOT(importFile()));
+	connect(ui->actionImportFolder, SIGNAL(triggered()), this, SLOT(importFolder()));
+
+	connect(ui->actionCloseProject, SIGNAL(triggered()), this, SLOT(closeProject()));
+
 	connect(ui->actionViewFile, SIGNAL(triggered()), this, SLOT(viewIsChanged()));
 	connect(ui->actionViewProject, SIGNAL(triggered()), this, SLOT(viewIsChanged()));
 	connect(ui->actionViewOutput, SIGNAL(triggered()), this, SLOT(viewIsChanged()));
@@ -80,6 +87,7 @@ void ucDevelop::newFile()
 
 	doc.append(editor->createDocument(0));
 	view = doc.last()->createView(this);
+	takeCentralWidget();
 	setCentralWidget(view);
 
 	ui->fileWidget->addItem("no named");
@@ -127,6 +135,7 @@ void ucDevelop::openURL(QString fileName)
 
 		doc.append(editor->createDocument(0));
 		view = doc.last()->createView(this);
+		takeCentralWidget();
 		setCentralWidget(view);
 
 		doc.last()->openUrl(url);
@@ -142,6 +151,7 @@ void ucDevelop::openURL(QString fileName)
 		actualOpenDoc = isOpen;
 		ui->fileWidget->setCurrentRow(isOpen);
 		view = doc.at(actualOpenDoc)->createView(this);
+		takeCentralWidget();
 		setCentralWidget(view);
 	}
 }
@@ -161,7 +171,7 @@ void ucDevelop::openProjectUrl(QUrl projectUrl)
 	{
 		ui->statusBar->showMessage(QString("Open project from URL: ").append(projectUrl.path()));
 		project.setProjectData(projectUrl);
-		//ui->output->setText(project.showProjectData());	//show data about opening project
+		ui->output->setText(project.showProjectData());	//show data about opening project
 
 		projectFileModel = new QFileSystemModel;
 		ui->projectView->setModel(projectFileModel);
@@ -178,6 +188,15 @@ void ucDevelop::openProjectUrl(QUrl projectUrl)
 		ui->actionBuildAndUpload->setEnabled(true);
 		ui->actionCleanProject->setEnabled(true);
 		ui->actionRebuild->setEnabled(true);
+
+		if(project.projectType.contains("C++",Qt::CaseInsensitive))
+			ui->actionAddClass->setEnabled(true);
+
+		ui->actionAddFile->setEnabled(true);
+		ui->actionImportFile->setEnabled(true);
+		ui->actionImportFolder->setEnabled(true);
+		ui->actionProjectSettings->setEnabled(true);
+		ui->actionCloseProject->setEnabled(true);
 	}
 }
 
@@ -200,7 +219,8 @@ void ucDevelop::save()
 {
 	ui->statusBar->showMessage("Save");
 
-	doc.at(actualOpenDoc)->documentSave();
+	if(!doc.isEmpty())
+		doc.at(actualOpenDoc)->documentSave();
 }
 
 void ucDevelop::saveDocument(int index)
@@ -208,17 +228,29 @@ void ucDevelop::saveDocument(int index)
 	ui->statusBar->showMessage("Save document");
 
 	doc.at(index)->documentSave();
+	disconnect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
+	documentSavedAt(index);
+	connect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
 }
 
 void ucDevelop::saveAs()
 {
-	ui->statusBar->showMessage("Save as...");
-	doc.at(actualOpenDoc)->documentSaveAs();
+	if(!doc.isEmpty())
+	{
+		ui->statusBar->showMessage("Save as...");
+		doc.at(actualOpenDoc)->documentSaveAs();
+	}
 }
 
 void ucDevelop::saveProject()
 {
+	//save all
 	ui->statusBar->showMessage("Save project");
+
+	for(int i = 0; i < doc.count(); i++)
+	{
+		saveDocument(i);
+	}
 }
 
 void ucDevelop::closeFile()
@@ -249,8 +281,8 @@ int ucDevelop::closeFileAt(int index)
 
 		if(ui->fileWidget->count() == 0)
 		{
-			//takeCentralWidget();
-			//setCentralWidget(ui->centralWidget);
+			takeCentralWidget();
+			setCentralWidget(ui->centralWidget);
 		}
 	}
 
@@ -498,6 +530,78 @@ void ucDevelop::projectSettings()
 	ui->statusBar->showMessage("Project settings");
 }
 
+void ucDevelop::addFile()
+{
+	ui->statusBar->showMessage("Add file");
+
+	bool ok;
+	QString fileName = QInputDialog::getText(this, tr("Add new file..."),
+						 tr("File name:"), QLineEdit::Normal,
+						 "", &ok);
+	if(project.fileList.contains(fileName, Qt::CaseSensitive))
+	{
+		QMessageBox msgBox;
+		msgBox.setText("File " + fileName + " already exists. Enter a different name.");
+		msgBox.exec();
+		addFile();
+	}
+	else if (ok && !fileName.isEmpty())
+	{
+		ui->statusBar->showMessage(fileName);
+		project.addFile(fileName);
+	}
+}
+
+void ucDevelop::addClass()
+{
+	ui->statusBar->showMessage("Add class");
+
+	bool ok;
+	QString className = QInputDialog::getText(this, tr("Add new class..."),
+						 tr("Class name:"), QLineEdit::Normal,
+						 "", &ok);
+	if(project.fileList.contains(className.toLower() + ".h", Qt::CaseSensitive)
+		|| project.fileList.contains(className.toLower() + ".cpp", Qt::CaseSensitive))
+	{
+		QMessageBox msgBox;
+		msgBox.setText("File " + className + " already exists. Enter a different name.");
+		msgBox.exec();
+		addClass();
+	}
+	else if (ok && className.isEmpty())
+	{
+		QMessageBox msgBox;
+		msgBox.setText("Class name is empty!");
+		msgBox.exec();
+		addClass();
+	}
+	else if (ok && !className.isEmpty())
+	{
+		ui->statusBar->showMessage(className);
+		project.addClass(className);
+	}
+}
+
+void ucDevelop::importFile()
+{
+	ui->statusBar->showMessage("Import file");
+
+	QString filename = QFileDialog::getOpenFileName(this,tr("Import file..."), "/home", tr("Source/Header (*.cpp *.c *.h)"));
+
+	if(!filename.isEmpty())
+		project.importFile(QUrl(filename));
+}
+
+void ucDevelop::importFolder()
+{
+	ui->statusBar->showMessage("Import folder");
+}
+
+void ucDevelop::closeProject()
+{
+	ui->statusBar->showMessage("Close project");
+}
+
 void ucDevelop::viewIsChanged()
 {
 	ui->statusBar->showMessage("Change view");
@@ -515,11 +619,16 @@ void ucDevelop::about()
 
 void ucDevelop::fileListClicked()
 {
+	disconnect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
+
 	actualOpenDoc = ui->fileWidget->currentRow();
 	view = doc.at(actualOpenDoc)->createView(this);
+	takeCentralWidget();
 	setCentralWidget(view);
 
 	ui->statusBar->showMessage("File list was clicked");
+
+	connect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
 }
 
 void ucDevelop::documentChanged()
@@ -545,6 +654,16 @@ void ucDevelop::documentSaved()
 	ui->fileWidget->takeItem(actualOpenDoc);
 	ui->fileWidget->insertItem(actualOpenDoc,doc.at(actualOpenDoc)->url().fileName());
 	ui->fileWidget->setCurrentRow(actualOpenDoc);
+}
+
+void ucDevelop::documentSavedAt(int index)
+{
+	ui->statusBar->showMessage("Document was saved");
+
+	ui->fileWidget->takeItem(index);
+	ui->fileWidget->insertItem(index,doc.at(index)->url().fileName());
+	ui->fileWidget->setCurrentRow(actualOpenDoc);
+
 }
 
 void ucDevelop::projectViewDoubleClick(QModelIndex index)

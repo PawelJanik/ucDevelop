@@ -1,8 +1,9 @@
 //Project create in ucDevelop [ucdevelopVersion] by [autorName]
 
-#include "function.h"
-
-void func()
+class myClass
 {
-	//example fnction
-}
+public:
+	int i;
+	
+	void func();
+};

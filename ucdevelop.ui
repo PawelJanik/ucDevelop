@@ -17,6 +17,12 @@
    <iconset>
     <normaloff>ucdevelop.png</normaloff>ucdevelop.png</iconset>
   </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::VerticalTabs</set>
+  </property>
   <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -68,7 +74,14 @@
     <addaction name="actionCleanProject"/>
     <addaction name="actionRebuild"/>
     <addaction name="separator"/>
+    <addaction name="actionAddFile"/>
+    <addaction name="actionAddClass"/>
+    <addaction name="actionImportFolder"/>
+    <addaction name="actionImportFile"/>
+    <addaction name="separator"/>
     <addaction name="actionProjectSettings"/>
+    <addaction name="separator"/>
+    <addaction name="actionCloseProject"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -306,6 +319,9 @@
    </property>
   </action>
   <action name="actionProjectSettings">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Project preference</string>
    </property>
@@ -363,6 +379,46 @@
    </property>
    <property name="text">
     <string>Rebu&amp;ild</string>
+   </property>
+  </action>
+  <action name="actionAddFile">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Add &amp;file</string>
+   </property>
+  </action>
+  <action name="actionImportFolder">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>I&amp;mport folder</string>
+   </property>
+  </action>
+  <action name="actionAddClass">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Add c&amp;lass</string>
+   </property>
+  </action>
+  <action name="actionImportFile">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Imp&amp;ort file</string>
+   </property>
+  </action>
+  <action name="actionCloseProject">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Close pro&amp;ject</string>
    </property>
   </action>
  </widget>

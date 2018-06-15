@@ -6,9 +6,11 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QDir>
 
 #include "mcu.h"
 #include "programmer.h"
+#include "global.h"
 
 class Project
 {
@@ -40,8 +42,15 @@ public:
 
 	QString showProjectData();
 
+	void addFile(QString fileName, QString text = "");
+	void addClass(QString className);
+
+	void importFile(QUrl url);
+	void importFolder(QUrl url);
+
 private:
 	QUrl projectFileUrl;
+	void addFileToProject(QString fileName);
 };
 
 #endif // PROJECT_H

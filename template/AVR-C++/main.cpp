@@ -1,8 +1,10 @@
 //Project create in ucDevelop [ucdevelopVersion] by [autorName]
 
-#include "function.h"
+#include <avr/io.h>
 
-void func()
+#include "class.h"
+
+int main()
 {
-	//example fnction
+	myClass a;
 }

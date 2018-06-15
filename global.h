@@ -5,6 +5,4 @@
 
 const QString ucdevelopVersion = "1.0.0";
 
-QString avrdudeConfPath;
-
 #endif // GLOBAL_H

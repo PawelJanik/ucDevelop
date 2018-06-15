@@ -15,8 +15,6 @@ void Project::setProjectData(QUrl projectUrl)
 	projectFileUrl = projectUrl;
 	path = projectUrl.adjusted(QUrl::RemoveFilename | QUrl::StripTrailingSlash);
 
-	name = "znawa";
-
 	QFile projectFile(projectUrl.path());
 	if (!projectFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		return;
@@ -248,4 +246,170 @@ QList <Programmer> Project::getProgrammerList()
 	}
 
 	return List;
+}
+
+void Project::addFile(QString fileName, QString text)
+{
+	//---------create new file
+	QFile newFile(QString(path.path()).append("/").append(fileName));
+	QFile newFileTemplate(QDir::current().path() + "/template/generalTemplate/newFile.template");
+
+	if (!newFile.open(QIODevice::ReadWrite | QIODevice::Text))
+		return;
+
+	if (!newFileTemplate.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	QTextStream newFileStream(&newFile);
+	QTextStream newFileTemplateStream(&newFileTemplate);
+
+	QString templateString = newFileTemplateStream.readAll();
+
+	templateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+	templateString.replace("[projectName]", name,Qt::CaseInsensitive);
+	templateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
+	templateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
+	templateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
+	templateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
+	templateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
+	templateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
+
+	newFileStream << templateString;
+	newFileStream << text;
+	newFile.close();
+
+	fileList.append(fileName);		//add file to file list
+
+	addFileToProject(fileName);
+}
+
+void Project::addClass(QString className)
+{
+	//---------create new source file
+	QFile newClassSourceFile(path.path() + "/" + className + ".cpp");
+	QFile newClassSourceFileTemplate(QDir::current().path() + "/template/generalTemplate/newClass.cpptemplate");
+
+	if (!newClassSourceFile.open(QIODevice::ReadWrite | QIODevice::Text))
+		return;
+
+	if (!newClassSourceFileTemplate.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	QTextStream newClassSourceFileStream(&newClassSourceFile);
+	QTextStream newClassSourceFileTemplateStream(&newClassSourceFileTemplate);
+
+	QString sourceFiletemplateString = newClassSourceFileTemplateStream.readAll();
+
+	sourceFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[className]", className,Qt::CaseInsensitive);
+	sourceFiletemplateString.replace("[classHeaderName]", className.toLower(),Qt::CaseInsensitive);
+
+	newClassSourceFileStream << sourceFiletemplateString;
+
+	newClassSourceFile.close();
+	newClassSourceFileTemplate.close();
+
+	fileList.append(className.toLower() + ".cpp");		//add file to file list
+
+	//---------create new header file
+	QFile newClassHeaderFile(path.path() + "/" + className + ".h");
+	QFile newClassHeaderFileTemplate(QDir::current().path() + "/template/generalTemplate/newClass.htemplate");
+
+	if (!newClassHeaderFile.open(QIODevice::ReadWrite | QIODevice::Text))
+		return;
+
+	if (!newClassHeaderFileTemplate.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	QTextStream newClassHeaderFileStream(&newClassHeaderFile);
+	QTextStream newClassHeaderFileTemplateStream(&newClassHeaderFileTemplate);
+
+	QString headerFiletemplateString = newClassHeaderFileTemplateStream.readAll();
+
+	headerFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
+	headerFiletemplateString.replace("[className]", className,Qt::CaseInsensitive);
+
+	newClassHeaderFileStream << headerFiletemplateString;
+
+	newClassHeaderFile.close();
+	newClassHeaderFileTemplate.close();
+
+	fileList.append(className.toLower() + ".h");		//add file to file list
+
+	addFileToProject(className.toLower() + ".cpp");
+	addFileToProject(className.toLower() + ".h");
+}
+
+void Project::importFile(QUrl url)
+{
+	QString fileName = url.fileName();
+
+	QFile::copy(url.path(),path.path() + "/" + fileName);
+
+	addFileToProject(fileName);
+}
+
+void Project::importFolder(QUrl url)
+{
+
+}
+
+void Project::addFileToProject(QString fileName)
+{
+	//----------add new file to project file
+	QFile projectFile(path.path().append("/").append(name).append(".ucdevelop"));
+	if (!projectFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	QTextStream projectFileStream(&projectFile);
+	QString projectFileString = projectFileStream.readAll();
+	projectFileString.replace(";",QString("\t").append(fileName).append("\n;"));
+
+	projectFile.remove();
+
+	if (!projectFile.open(QIODevice::ReadWrite | QIODevice::Text))
+		return;
+
+	projectFileStream.setDevice(&projectFile);
+	projectFileStream << projectFileString;
+	projectFile.close();
+
+	//----------add new file to make/(cmake) file
+	if(projectManager == "make" && (fileName.contains(".c",Qt::CaseInsensitive) || fileName.contains(".cpp",Qt::CaseInsensitive)))
+	{
+		QFile makeFile(path.path().append("/").append("makefile"));
+		if (!makeFile.open(QIODevice::ReadOnly | QIODevice::Text))
+			return;
+
+		QTextStream makeFileStream(&makeFile);
+		QString makeFileString = makeFileStream.readAll();
+		makeFileString.replace("SRC =",QString("SRC = ").append(fileName));
+
+		makeFile.remove();
+
+		if (!makeFile.open(QIODevice::ReadWrite | QIODevice::Text))
+			return;
+
+		makeFileStream.setDevice(&makeFile);
+		makeFileStream << makeFileString;
+		makeFile.close();
+	}
+	else if(projectManager == "cmake" && (fileName.contains(".c",Qt::CaseInsensitive) || fileName.contains(".cpp",Qt::CaseInsensitive)))
+	{
+		//instruction to add file to cmake
+	}
 }

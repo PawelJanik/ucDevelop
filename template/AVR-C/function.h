@@ -1,3 +1,3 @@
-//Project create in AvrGui [avrguiVersion]
+//Project create in ucDevelop [ucdevelopVersion] by [autorName]
 
 void func(); 
