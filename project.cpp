@@ -265,14 +265,16 @@ void Project::addFile(QString fileName, QString text)
 
 	QString templateString = newFileTemplateStream.readAll();
 
-	templateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
-	templateString.replace("[projectName]", name,Qt::CaseInsensitive);
-	templateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
-	templateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
-	templateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
-	templateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
-	templateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
-	templateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
+	//templateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+	//templateString.replace("[projectName]", name,Qt::CaseInsensitive);
+	//templateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
+	//templateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
+	//templateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
+	//templateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
+	//templateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
+	//templateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
+
+	templateString = changeProjectTagOnData(templateString);
 
 	newFileStream << templateString;
 	newFileStream << text;
@@ -286,7 +288,7 @@ void Project::addFile(QString fileName, QString text)
 void Project::addClass(QString className)
 {
 	//---------create new source file
-	QFile newClassSourceFile(path.path() + "/" + className + ".cpp");
+	QFile newClassSourceFile(path.path() + "/" + className.toLower() + ".cpp");
 	QFile newClassSourceFileTemplate(QDir::current().path() + "/template/generalTemplate/newClass.cpptemplate");
 
 	if (!newClassSourceFile.open(QIODevice::ReadWrite | QIODevice::Text))
@@ -300,16 +302,18 @@ void Project::addClass(QString className)
 
 	QString sourceFiletemplateString = newClassSourceFileTemplateStream.readAll();
 
-	sourceFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
-	sourceFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
-	sourceFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
-	sourceFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
-	sourceFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
-	sourceFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
-	sourceFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
-	sourceFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
+	//sourceFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
 	sourceFiletemplateString.replace("[className]", className,Qt::CaseInsensitive);
 	sourceFiletemplateString.replace("[classHeaderName]", className.toLower(),Qt::CaseInsensitive);
+
+	sourceFiletemplateString = changeProjectTagOnData(sourceFiletemplateString);
 
 	newClassSourceFileStream << sourceFiletemplateString;
 
@@ -319,7 +323,7 @@ void Project::addClass(QString className)
 	fileList.append(className.toLower() + ".cpp");		//add file to file list
 
 	//---------create new header file
-	QFile newClassHeaderFile(path.path() + "/" + className + ".h");
+	QFile newClassHeaderFile(path.path() + "/" + className.toLower() + ".h");
 	QFile newClassHeaderFileTemplate(QDir::current().path() + "/template/generalTemplate/newClass.htemplate");
 
 	if (!newClassHeaderFile.open(QIODevice::ReadWrite | QIODevice::Text))
@@ -333,15 +337,17 @@ void Project::addClass(QString className)
 
 	QString headerFiletemplateString = newClassHeaderFileTemplateStream.readAll();
 
-	headerFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
-	headerFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
-	headerFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
-	headerFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
-	headerFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
-	headerFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
-	headerFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
-	headerFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
+	//headerFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
 	headerFiletemplateString.replace("[className]", className,Qt::CaseInsensitive);
+
+	headerFiletemplateString = changeProjectTagOnData(headerFiletemplateString);
 
 	newClassHeaderFileStream << headerFiletemplateString;
 
@@ -363,9 +369,43 @@ void Project::importFile(QUrl url)
 	addFileToProject(fileName);
 }
 
-void Project::importFolder(QUrl url)
+void Project::importFolder(QUrl importDirUrl, QUrl url)
 {
+	QDir dir(url.path());
 
+	dir.mkdir(importDirUrl.fileName());
+	dir.cd(importDirUrl.fileName());
+
+	QDir dirToCopy(importDirUrl.path());
+
+	importFolderRecursive(dirToCopy,dir);
+}
+
+void Project::importFolderRecursive(QDir importDir, QDir dir)
+{
+	QStringList dirList = importDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+	for(int i = 0; i < dirList.count(); i++)
+	{
+		QDir copyFrom(importDir.path() + "/" + dirList.at(i));
+		QDir copyTo(dir.path() + "/" + dirList.at(i));
+
+		dir.mkdir(dirList.at(i));
+		dir.cd(dirList.at(i));
+
+		importFolderRecursive(copyFrom,copyTo);
+
+		dir.cdUp();
+	}
+
+	QStringList fileList = importDir.entryList(QDir::Files);
+
+	for(int i = 0; i < fileList.count(); i++)
+	{
+		QFile::copy(importDir.path() + "/" + fileList.at(i), dir.path() + "/" + fileList.at(i));
+
+		addFileToProject(dir.path().remove(path.path() + "/") + "/" + fileList.at(i));
+	}
 }
 
 void Project::addFileToProject(QString fileName)
@@ -412,4 +452,20 @@ void Project::addFileToProject(QString fileName)
 	{
 		//instruction to add file to cmake
 	}
+}
+
+QString Project::changeProjectTagOnData(QString str)
+{
+	str.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+	str.replace("[projectName]", name,Qt::CaseInsensitive);
+	str.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
+	str.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
+	str.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
+	str.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
+	if(!programmer.portName.isEmpty())
+		str.replace("#PORT_PROGRAMMER = -P", QString("PORT_PROGRAMMER = -P ").append(programmer.portName),Qt::CaseInsensitive);
+	str.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
+	str.replace("[autorName]", autorName,Qt::CaseInsensitive);
+
+	return str;
 }

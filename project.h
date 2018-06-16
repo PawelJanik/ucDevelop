@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QDir>
 
+#include <QtDebug>
+
 #include "mcu.h"
 #include "programmer.h"
 #include "global.h"
@@ -46,7 +48,10 @@ public:
 	void addClass(QString className);
 
 	void importFile(QUrl url);
-	void importFolder(QUrl url);
+	void importFolder(QUrl importDirUrl, QUrl url);
+	void importFolderRecursive(QDir importDir, QDir dir);
+
+	QString changeProjectTagOnData(QString str);
 
 private:
 	QUrl projectFileUrl;

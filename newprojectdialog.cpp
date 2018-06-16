@@ -232,16 +232,18 @@ void newProjectDialog::createProject()
 
 			file.remove();
 
-			fileString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
-			fileString.replace("[projectName]", project.name,Qt::CaseInsensitive);
-			fileString.replace("[mcu]", project.mcu.id,Qt::CaseInsensitive);
-			fileString.replace("[mmcu]", project.getMMCU(),Qt::CaseInsensitive);
-			fileString.replace("[programmer]", project.programmer.id,Qt::CaseInsensitive);
-			fileString.replace("[programmerPort]", project.programmer.portName,Qt::CaseInsensitive);
-			if(!project.programmer.portName.isEmpty())
-				fileString.replace("#PORT_PROGRAMMER = -P", QString("PORT_PROGRAMMER = -P ").append(project.programmer.portName),Qt::CaseInsensitive);
-			fileString.replace("[clock]", project.mcu.clock,Qt::CaseInsensitive);
-			fileString.replace("[autorName]", project.autorName,Qt::CaseInsensitive);
+			//fileString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
+			//fileString.replace("[projectName]", project.name,Qt::CaseInsensitive);
+			//fileString.replace("[mcu]", project.mcu.id,Qt::CaseInsensitive);
+			//fileString.replace("[mmcu]", project.getMMCU(),Qt::CaseInsensitive);
+			//fileString.replace("[programmer]", project.programmer.id,Qt::CaseInsensitive);
+			//fileString.replace("[programmerPort]", project.programmer.portName,Qt::CaseInsensitive);
+			//if(!project.programmer.portName.isEmpty())
+			//	fileString.replace("#PORT_PROGRAMMER = -P", QString("PORT_PROGRAMMER = -P ").append(project.programmer.portName),Qt::CaseInsensitive);
+			//fileString.replace("[clock]", project.mcu.clock,Qt::CaseInsensitive);
+			//fileString.replace("[autorName]", project.autorName,Qt::CaseInsensitive);
+
+			fileString = project.changeProjectTagOnData(fileString);
 
 			if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
 				return;

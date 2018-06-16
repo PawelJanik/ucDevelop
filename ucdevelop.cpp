@@ -595,11 +595,30 @@ void ucDevelop::importFile()
 void ucDevelop::importFolder()
 {
 	ui->statusBar->showMessage("Import folder");
+
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"/home",QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	project.importFolder(QUrl(dir), project.path);
+	ui->statusBar->showMessage(dir);
 }
 
 void ucDevelop::closeProject()
 {
 	ui->statusBar->showMessage("Close project");
+
+
+	ui->actionBuild->setEnabled(false);
+	ui->actionUpload->setEnabled(false);
+	ui->actionBuildAndUpload->setEnabled(false);
+	ui->actionCleanProject->setEnabled(false);
+	ui->actionRebuild->setEnabled(false);
+	ui->actionAddClass->setEnabled(false);
+	ui->actionAddFile->setEnabled(false);
+	ui->actionImportFile->setEnabled(false);
+	ui->actionImportFolder->setEnabled(false);
+	ui->actionProjectSettings->setEnabled(false);
+	ui->actionCloseProject->setEnabled(false);
+	delete projectFileModel;
 }
 
 void ucDevelop::viewIsChanged()
