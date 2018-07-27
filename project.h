@@ -53,6 +53,8 @@ public:
 
 	QString changeProjectTagOnData(QString str);
 
+	void upDateEditedData();
+
 private:
 	QUrl projectFileUrl;
 	void addFileToProject(QString fileName);

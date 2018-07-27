@@ -173,14 +173,7 @@ void newProjectDialog::createProject()
 	project.programmer = programmerList.at(ui->programmerComboBox->currentIndex());
 	project.programmer.portName = ui->portEdit->text();
 
-	if(ui->clockEdit->text().isEmpty())
-	{
-		msgBox.setText("Enter frequency for clock.");
-		msgBox.exec();
-		err = true;
-	}
-	else
-		project.mcu.clock = ui->clockEdit->text();
+	project.mcu.clock = ui->clockComboBox->currentText();
 
 	if(ui->pathToProjectRequister->url().isEmpty())
 	{

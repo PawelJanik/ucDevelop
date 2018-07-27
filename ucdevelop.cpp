@@ -57,6 +57,13 @@ ucDevelop::ucDevelop(QWidget *parent) :
 
 	connect(ui->fileWidget, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(fileListClicked()));
 	connect(ui->projectView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(projectViewDoubleClick(QModelIndex)));
+
+	ui->fileWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	ui->projectView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(ui->fileWidget, SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(fileWidgetContextMenu(QPoint)));
+	connect(ui->projectView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(projectViewContextMenu(QPoint)));
+
 }
 
 ucDevelop::~ucDevelop()
@@ -79,6 +86,29 @@ void ucDevelop::closeEvent(QCloseEvent *event)
 		event->accept();
 	else
 		event->ignore();
+}
+
+void ucDevelop::fileWidgetContextMenu(const QPoint &pos)
+{
+	ui->statusBar->showMessage("File list context menu");
+
+	QListWidgetItem * clickedItem = ui->fileWidget->itemAt(pos);
+
+	if(clickedItem != 0)
+	{
+		ui->statusBar->showMessage(clickedItem->text());
+
+		QMenu contextMenu;
+		contextMenu.addAction(ui->actionCloseFile);
+		contextMenu.addAction(ui->actionSave);
+
+		contextMenu.exec(ui->fileWidget->mapToGlobal(pos));
+	}
+}
+
+void ucDevelop::projectViewContextMenu(const QPoint &pos)
+{
+	ui->statusBar->showMessage("Project context menu");
 }
 
 void ucDevelop::newFile()
@@ -171,11 +201,13 @@ void ucDevelop::openProjectUrl(QUrl projectUrl)
 	{
 		ui->statusBar->showMessage(QString("Open project from URL: ").append(projectUrl.path()));
 		project.setProjectData(projectUrl);
-		ui->output->setText(project.showProjectData());	//show data about opening project
+		ui->output->setText(project.showProjectData());	//show data about  project
 
 		projectFileModel = new QFileSystemModel;
 		ui->projectView->setModel(projectFileModel);
-		ui->projectView->setRootIndex(projectFileModel->setRootPath(project.path.path()));
+		projectFileModel->setRootPath(project.path.path());
+		ui->projectView->setRootIndex(projectFileModel->index(project.path.path()));
+		ui->projectView->setHeaderHidden(true);
 
 		ui->projectView->hideColumn(1);
 		ui->projectView->hideColumn(2);
@@ -527,7 +559,16 @@ void ucDevelop::settings()
 
 void ucDevelop::projectSettings()
 {
-	ui->statusBar->showMessage("Project settings");
+	projectSettingsDialog * projectsettingsdialog = new projectSettingsDialog(this);
+
+	projectsettingsdialog->setProjectToEdit(project);
+
+	int result = projectsettingsdialog->exec();
+
+	if(result == 1)
+	{
+		project = projectsettingsdialog->project;
+	}
 }
 
 void ucDevelop::addFile()

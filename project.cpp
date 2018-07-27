@@ -265,15 +265,6 @@ void Project::addFile(QString fileName, QString text)
 
 	QString templateString = newFileTemplateStream.readAll();
 
-	//templateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
-	//templateString.replace("[projectName]", name,Qt::CaseInsensitive);
-	//templateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
-	//templateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
-	//templateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
-	//templateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
-	//templateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
-	//templateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
-
 	templateString = changeProjectTagOnData(templateString);
 
 	newFileStream << templateString;
@@ -302,14 +293,6 @@ void Project::addClass(QString className)
 
 	QString sourceFiletemplateString = newClassSourceFileTemplateStream.readAll();
 
-	//sourceFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
-	//sourceFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
-	//sourceFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
-	//sourceFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
-	//sourceFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
-	//sourceFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
-	//sourceFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
-	//sourceFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
 	sourceFiletemplateString.replace("[className]", className,Qt::CaseInsensitive);
 	sourceFiletemplateString.replace("[classHeaderName]", className.toLower(),Qt::CaseInsensitive);
 
@@ -337,14 +320,6 @@ void Project::addClass(QString className)
 
 	QString headerFiletemplateString = newClassHeaderFileTemplateStream.readAll();
 
-	//headerFiletemplateString.replace("[ucdevelopVersion]", ucdevelopVersion,Qt::CaseInsensitive);
-	//headerFiletemplateString.replace("[projectName]", name,Qt::CaseInsensitive);
-	//headerFiletemplateString.replace("[mcu]", mcu.id,Qt::CaseInsensitive);
-	//headerFiletemplateString.replace("[mmcu]", getMMCU(),Qt::CaseInsensitive);
-	//headerFiletemplateString.replace("[programmer]", programmer.id,Qt::CaseInsensitive);
-	//headerFiletemplateString.replace("[programmerPort]", programmer.portName,Qt::CaseInsensitive);
-	//headerFiletemplateString.replace("[clock]", mcu.clock,Qt::CaseInsensitive);
-	//headerFiletemplateString.replace("[autorName]", autorName,Qt::CaseInsensitive);
 	headerFiletemplateString.replace("[className]", className,Qt::CaseInsensitive);
 
 	headerFiletemplateString = changeProjectTagOnData(headerFiletemplateString);
@@ -468,4 +443,9 @@ QString Project::changeProjectTagOnData(QString str)
 	str.replace("[autorName]", autorName,Qt::CaseInsensitive);
 
 	return str;
+}
+
+void Project::upDateEditedData()
+{
+
 }

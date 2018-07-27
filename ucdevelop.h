@@ -88,6 +88,9 @@ public slots:
 
 	void clearOutput();
 
+	void fileWidgetContextMenu(const QPoint &pos);
+	void projectViewContextMenu(const QPoint &pos);
+
 private:
 	Ui::ucDevelop *ui;
 

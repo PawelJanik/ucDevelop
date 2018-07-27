@@ -121,9 +121,6 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="1">
-    <widget class="QLineEdit" name="clockEdit"/>
-   </item>
    <item row="11" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
@@ -169,6 +166,43 @@
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QComboBox" name="clockComboBox">
+     <property name="editable">
+      <bool>true</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>1000000</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>2000000</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>4000000</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>8000000</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>11059200</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>16000000</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

@@ -2,7 +2,7 @@
 
 #include "[classHeaderName].h"
 
-void [className]::[ClassName]()
+[className]::[ClassName]()
 {
 	//conftructor
 };
