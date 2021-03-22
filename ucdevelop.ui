@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>877</width>
-     <height>23</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -176,27 +176,20 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="0" colspan="3">
+      <widget class="QTextEdit" name="output">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
-      <widget class="KLed" name="outputLed">
+      <widget class="QWidget" name="outputLed" native="true">
        <property name="maximumSize">
         <size>
          <width>30</width>
          <height>30</height>
         </size>
-       </property>
-       <property name="color">
-        <color>
-         <red>138</red>
-         <green>138</green>
-         <blue>138</blue>
-        </color>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="3">
-      <widget class="QTextEdit" name="output">
-       <property name="readOnly">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -423,13 +416,6 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>KLed</class>
-   <extends>QWidget</extends>
-   <header>kled.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

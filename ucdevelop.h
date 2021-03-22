@@ -3,9 +3,11 @@
 
 #include <QMainWindow>
 
-#include <KTextEditor/Document>
-#include <KTextEditor/Editor>
-#include <KTextEditor/View>
+//#include <KTextEditor/Document>
+//#include <KTextEditor/Editor>
+//#include <KTextEditor/View>
+
+#include <QTextEdit>
 
 #include <QFileDialog>
 #include <QFileSystemModel>
@@ -45,8 +47,8 @@ public slots:
 	void openProject();
 
 	void save();
-	void saveDocument(int index);
-	void saveAs();
+	void save(int index);
+	void saveAs(int index);
 	void saveProject();
 
 	void closeFile();
@@ -81,8 +83,6 @@ public slots:
 
 	void fileListClicked();
 	void documentChanged();
-	void documentSaved();
-	void documentSavedAt(int index);
 
 	void projectViewDoubleClick(QModelIndex index);
 
@@ -94,10 +94,8 @@ public slots:
 private:
 	Ui::ucDevelop *ui;
 
-	KTextEditor::Editor *editor;
-	KTextEditor::View * view;
-
-	QList<KTextEditor::Document *> doc;
+	QTextEdit * editor;
+	QList<QTextDocument *> doc;
 
 	int actualOpenDoc;
 

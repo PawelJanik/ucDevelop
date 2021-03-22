@@ -175,18 +175,20 @@ void newProjectDialog::createProject()
 
 	project.mcu.clock = ui->clockComboBox->currentText();
 
-	if(ui->pathToProjectRequister->url().isEmpty())
+	if(ui->pathToProjectEdit->text().isEmpty())
 	{
 		msgBox.setText("Select project file");
 		msgBox.exec();
 		err = true;
 	}
 	else
-		project.path = QUrl(QString(ui->pathToProjectRequister->text()).append("/").append(project.name));
+	{
+		project.path = QUrl(QString(ui->pathToProjectEdit->text()).append("/").append(project.name));
+	}
 
 	if(err == false)
 	{
-		QDir projectDir(ui->pathToProjectRequister->text());
+		QDir projectDir(ui->pathToProjectEdit->text());
 		projectDir.mkdir(ui->projectNameEdit->text());
 		projectDir.cd(ui->projectNameEdit->text());
 

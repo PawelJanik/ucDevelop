@@ -7,7 +7,7 @@ ucDevelop::ucDevelop(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	editor = KTextEditor::Editor::instance();
+	editor = new QTextEdit;
 
 	actualOpenDoc = 0;
 
@@ -115,18 +115,20 @@ void ucDevelop::newFile()
 {
 	ui->statusBar->showMessage("New file");
 
-	doc.append(editor->createDocument(0));
-	view = doc.last()->createView(this);
+	doc.append(new QTextDocument);
+
 	takeCentralWidget();
-	setCentralWidget(view);
+	setCentralWidget(editor);
 
 	ui->fileWidget->addItem("no named");
 	ui->fileWidget->setCurrentRow(doc.count());
 
-	connect(doc.last(), SIGNAL(modifiedChanged(KTextEditor::Document *)), this, SLOT(documentChanged()));
-	connect(doc.last(), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
-
 	ui->fileWidget->setCurrentRow((ui->fileWidget->count())-1);
+
+	actualOpenDoc = ui->fileWidget->currentRow();
+	editor->setDocument(doc.at(actualOpenDoc));
+
+	connect(doc.at(actualOpenDoc), SIGNAL(modificationChanged(bool)), this, SLOT(documentChanged()));
 }
 
 void ucDevelop::newProject()
@@ -163,26 +165,38 @@ void ucDevelop::openURL(QString fileName)
 		stringURL.append(fileName);
 		QUrl url = QUrl(stringURL);
 
-		doc.append(editor->createDocument(0));
-		view = doc.last()->createView(this);
-		takeCentralWidget();
-		setCentralWidget(view);
+		if(doc.isEmpty())
+		{
+			takeCentralWidget();
+			setCentralWidget(editor);
+		}
 
-		doc.last()->openUrl(url);
+		doc.append(new QTextDocument);
 
 		ui->fileWidget->addItem(url.fileName());
+		//ui->fileWidget->addItem(fileName);
 		ui->fileWidget->setCurrentRow((ui->fileWidget->count())-1);
 
-		connect(doc.last(), SIGNAL(modifiedChanged(KTextEditor::Document *)), this, SLOT(documentChanged()));
-		connect(doc.last(), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
+		actualOpenDoc = ui->fileWidget->currentRow();
+
+		QFile file(fileName);
+		if (file.open(QFile::ReadWrite | QFile::Text))
+		{
+			doc.at(actualOpenDoc)->setPlainText(file.readAll());
+			doc.at(actualOpenDoc)->setBaseUrl(fileName);
+		}
+
+		editor->setDocument(doc.at(actualOpenDoc));
+		doc.last()->setBaseUrl(fileName);
+
+		doc.at(actualOpenDoc)->setModified(false);
+		connect(doc.at(actualOpenDoc), SIGNAL(modificationChanged(bool)), this, SLOT(documentChanged()));
 	}
 	else
 	{
 		actualOpenDoc = isOpen;
 		ui->fileWidget->setCurrentRow(isOpen);
-		view = doc.at(actualOpenDoc)->createView(this);
-		takeCentralWidget();
-		setCentralWidget(view);
+		editor->setDocument(doc.at(actualOpenDoc));
 	}
 }
 
@@ -222,7 +236,9 @@ void ucDevelop::openProjectUrl(QUrl projectUrl)
 		ui->actionRebuild->setEnabled(true);
 
 		if(project.projectType.contains("C++",Qt::CaseInsensitive))
+		{
 			ui->actionAddClass->setEnabled(true);
+		}
 
 		ui->actionAddFile->setEnabled(true);
 		ui->actionImportFile->setEnabled(true);
@@ -238,7 +254,7 @@ int ucDevelop::isOpenFile(QString fileName)
 
 	for(int i = 0; i < doc.count(); i++)
 	{
-		if(fileName == doc.at(i)->url().path())
+		if(fileName == doc.at(i)->baseUrl().toString())
 		{
 			result = i;
 		}
@@ -252,25 +268,63 @@ void ucDevelop::save()
 	ui->statusBar->showMessage("Save");
 
 	if(!doc.isEmpty())
-		doc.at(actualOpenDoc)->documentSave();
+	{
+		if(doc.at(actualOpenDoc)->baseUrl().isEmpty())
+		{
+			saveAs(actualOpenDoc);
+		}
+		else
+		{
+			save(actualOpenDoc);
+		}
+	}
 }
 
-void ucDevelop::saveDocument(int index)
+void ucDevelop::save(int index)
 {
 	ui->statusBar->showMessage("Save document");
 
-	doc.at(index)->documentSave();
-	disconnect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
-	documentSavedAt(index);
-	connect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
+	QFile file(doc.at(index)->baseUrl().toString());
+	if(!file.open(QFile::WriteOnly | QFile::Text))
+	{
+		qDebug() << " Could not open file for writing";
+		return;
+	}
+
+	QTextStream out(&file);
+	out << doc.at(index)->toPlainText();
+	file.flush();
+	file.close();
+
+	ui->fileWidget->takeItem(index);
+	ui->fileWidget->insertItem(index,doc.at(index)->baseUrl().fileName());
+
 }
 
-void ucDevelop::saveAs()
+void ucDevelop::saveAs(int index)
 {
 	if(!doc.isEmpty())
 	{
 		ui->statusBar->showMessage("Save as...");
-		doc.at(actualOpenDoc)->documentSaveAs();
+
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Save as..."));
+
+		QFile file(fileName);
+		if(!file.open(QFile::WriteOnly | QFile::Text))
+		{
+			qDebug() << " Could not open file for writing";
+			return;
+		}
+
+		QTextStream out(&file);
+		out << doc.at(index)->toPlainText();
+		file.flush();
+		file.close();
+
+		doc.at(index)->setBaseUrl(fileName);
+		QListWidgetItem * item = ui->fileWidget->item(index);
+		item->setText(doc.at(index)->baseUrl().fileName());
+		ui->fileWidget->editItem(item);
 	}
 }
 
@@ -281,7 +335,7 @@ void ucDevelop::saveProject()
 
 	for(int i = 0; i < doc.count(); i++)
 	{
-		saveDocument(i);
+		save(i);
 	}
 }
 
@@ -304,20 +358,17 @@ int ucDevelop::closeFileAt(int index)
 		ui->fileWidget->takeItem(index);
 		doc.removeAt(index);
 
-		if(!doc.isEmpty())
-		{
-			actualOpenDoc = ui->fileWidget->currentRow();
-			view = doc.at(actualOpenDoc)->createView(this);
-			setCentralWidget(view);
-		}
-
-		if(ui->fileWidget->count() == 0)
+		if(doc.isEmpty())
 		{
 			takeCentralWidget();
 			setCentralWidget(ui->centralWidget);
 		}
+		else
+		{
+			actualOpenDoc = ui->fileWidget->currentRow();
+			editor->setDocument(doc.at(actualOpenDoc));
+		}
 	}
-
 	return result;
 }
 
@@ -334,14 +385,23 @@ int ucDevelop::documentIsClosing(int index)
 	if(fileName.contains("*",Qt::CaseInsensitive))
 	{
 		QMessageBox saveMessage;
-		saveMessage.setText(QString("Document: ").append(doc.at(index)->documentName()).append( " has been modified."));
+		saveMessage.setText(QString("Document: ").append(doc.at(index)->baseUrl().fileName().append( " has been modified.")));
 		saveMessage.setInformativeText("Do you want to save your changes?");
 		saveMessage.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 		saveMessage.setDefaultButton(QMessageBox::Save);
 		result = saveMessage.exec();
 
 		if(result == QMessageBox::Save)
-			saveDocument(index);
+		{
+			if(doc.at(index)->baseUrl().isEmpty())
+			{
+				saveAs(index);
+			}
+			else
+			{
+				save(index);
+			}
+		}
 	}
 
 	return result;
@@ -368,14 +428,14 @@ void ucDevelop::build()
 
 	for(int i = 0; i < doc.count(); i++)
 	{
-		saveDocument(i);
+		save(i);
 	}
 
 	buildWarningCounter = 0;
 	buildErrorCounter = 0;
 
 	clearOutput();
-	ui->outputLed->setColor(Qt::gray);
+    //ui->outputLed->setColor(Qt::gray);
 	ui->outputLabel->setText("Program is building...");
 
 	buildProcess = new QProcess(0);
@@ -408,13 +468,13 @@ void ucDevelop::build()
 
 	if((buildErrorCounter == 0) && (buildWarningCounter == 0))
 	{
-		ui->outputLed->setColor(Qt::green);
+	//ui->outputLed->setColor(Qt::green);
 		ui->outputLabel->setText("Program was build.");
 		isBuild = true;
 	}
 	else if((buildErrorCounter == 0) && (buildWarningCounter > 0))
 	{
-		ui->outputLed->setColor(Qt::yellow);
+	//ui->outputLed->setColor(Qt::yellow);
 		ui->outputLabel->setText(QString("Program was built with ")
 					 .append(QString::number(buildWarningCounter))
 					 .append(" warnings."));
@@ -422,7 +482,7 @@ void ucDevelop::build()
 	}
 	else if((buildErrorCounter > 0) && (buildWarningCounter == 0))
 	{
-		ui->outputLed->setColor(Qt::red);
+	//ui->outputLed->setColor(Qt::red);
 		ui->outputLabel->setText(QString("Program has ")
 					 .append(QString::number(buildErrorCounter))
 					 .append(" errors."));
@@ -430,7 +490,7 @@ void ucDevelop::build()
 	}
 	else if((buildErrorCounter > 0) && (buildWarningCounter > 0))
 	{
-		ui->outputLed->setColor(Qt::red);
+	//ui->outputLed->setColor(Qt::red);
 		ui->outputLabel->setText(QString("Program has ")
 					 .append(QString::number(buildErrorCounter))
 					 .append(" errors, and ")
@@ -448,7 +508,7 @@ void ucDevelop::upload()
 	{
 		clearOutput();
 		uploadFalied = 0;
-		ui->outputLed->setColor(Qt::gray);
+	//ui->outputLed->setColor(Qt::gray);
 		ui->outputLabel->setText("Program is uploading...");
 
 		buildProcess = new QProcess(0);
@@ -476,13 +536,13 @@ void ucDevelop::upload()
 		if(outputString.contains("avrdude: AVR device not responding",Qt::CaseInsensitive))
 		{
 			uploadFalied++;
-			ui->outputLed->setColor(Qt::red);
+	    //ui->outputLed->setColor(Qt::red);
 			ui->outputLabel->setText("Check the device connection or program configuration.");
 		}
 
 		if(uploadFalied == 0)
 		{
-			ui->outputLed->setColor(Qt::green);
+	    //ui->outputLed->setColor(Qt::green);
 			ui->outputLabel->setText("Program was uploaded.");
 		}
 	}
@@ -523,7 +583,7 @@ void ucDevelop::cleanProject()
 
 	delete buildProcess;
 
-	ui->outputLed->setColor(Qt::green);
+    //ui->outputLed->setColor(Qt::green);
 	ui->outputLabel->setText("Project is clean.");
 }
 
@@ -679,16 +739,10 @@ void ucDevelop::about()
 
 void ucDevelop::fileListClicked()
 {
-	disconnect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
-
 	actualOpenDoc = ui->fileWidget->currentRow();
-	view = doc.at(actualOpenDoc)->createView(this);
-	takeCentralWidget();
-	setCentralWidget(view);
+	editor->setDocument(doc.at(actualOpenDoc));
 
 	ui->statusBar->showMessage("File list was clicked");
-
-	connect(doc.at(actualOpenDoc), SIGNAL(documentSavedOrUploaded(KTextEditor::Document *,bool)), this, SLOT(documentSaved()));
 }
 
 void ucDevelop::documentChanged()
@@ -697,33 +751,17 @@ void ucDevelop::documentChanged()
 	doc.at(actualOpenDoc)->setModified(false);
 
 	ui->fileWidget->takeItem(actualOpenDoc);
-	QString filename = doc.at(actualOpenDoc)->url().fileName();
+	QString filename = doc.at(actualOpenDoc)->baseUrl().fileName();
 	if(filename.isEmpty() == true)
-		filename = "nonamed";
+	{
+		filename = "no named";
+	}
+
 	filename.append("*");
 	ui->fileWidget->insertItem(actualOpenDoc,filename);
 	ui->fileWidget->setCurrentRow(actualOpenDoc);
 
 	isBuild = false;
-}
-
-void ucDevelop::documentSaved()
-{
-	ui->statusBar->showMessage("Document was saved");
-
-	ui->fileWidget->takeItem(actualOpenDoc);
-	ui->fileWidget->insertItem(actualOpenDoc,doc.at(actualOpenDoc)->url().fileName());
-	ui->fileWidget->setCurrentRow(actualOpenDoc);
-}
-
-void ucDevelop::documentSavedAt(int index)
-{
-	ui->statusBar->showMessage("Document was saved");
-
-	ui->fileWidget->takeItem(index);
-	ui->fileWidget->insertItem(index,doc.at(index)->url().fileName());
-	ui->fileWidget->setCurrentRow(actualOpenDoc);
-
 }
 
 void ucDevelop::projectViewDoubleClick(QModelIndex index)
